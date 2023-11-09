@@ -1,7 +1,24 @@
-# In the event, we require a few things.
-# First is the service name, what service is it referring to?
-# Second is the environment, are we in prod? dev?
-# Third is an array of supported vendors e.g. ['slack', 'teams']
+from loguru import logger
+from services.slack_service import SlackService
+from models.structured_event import StructuredEvent
+
 
 def notification_handler(event, context) -> dict:
-    pass
+    logger.info("Successfully initiated the notification lambda, processing request.")
+
+    structured_event: StructuredEvent = StructuredEvent(
+        event["message"],
+        event["nhs_environment"],
+        event["service_name"]
+    )
+
+    # Instantiate services.
+    slack_service = SlackService()
+
+    # Send messages.
+    slack_service.send_notification(structured_event)
+
+    return {
+        "status": 200,
+        "result": "success"
+    }
