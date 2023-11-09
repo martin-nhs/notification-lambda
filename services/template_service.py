@@ -1,4 +1,5 @@
-from jinja2 import Environment, FileSystemLoader, TemplateError
+from models.structured_event import StructuredEvent
+from jinja2 import Environment, FileSystemLoader
 
 
 class TemplateService:
@@ -6,14 +7,11 @@ class TemplateService:
         self._template_loader = FileSystemLoader("./templates")
         self._environment = Environment(loader=self._template_loader)
 
-    def get_slack_notification_template(self, message: str, nhs_environment: str, service_name: str) -> str:
-        try:
-            template = self._environment.get_template("slack_notification.jinja")
+    def get_slack_notification_template(self, event: StructuredEvent) -> str:
+        template = self._environment.get_template("slack_notification.jinja")
 
-            return template.render({
-                service_name,
-                nhs_environment,
-                message
-            })
-        except TemplateError as error:
-            pass
+        return template.render({
+            "message": event.message,
+            "nhs_environment": event.nhs_environment,
+            "service_name": event.service_name
+        })
